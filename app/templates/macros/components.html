@@ -1,0 +1,294 @@
+{#
+Component Macros Library
+
+Reusable UI component macros to eliminate duplication across templates.
+Includes cards, badges, buttons, meta displays, and more.
+
+Usage:
+{% from 'macros/components.html' import flash_message, post_card, admin_actions %}
+{{ flash_message('success', 'Post created successfully!') }}
+#}
+
+{% from 'macros/icons.html' import icon_user, icon_clock, icon_tag, icon_comment, icon_arrow_right, icon_edit,
+icon_delete, icon_eye, icon_plus %}
+
+{# Flash Message Component #}
+{% macro flash_message(category, message) %}
+<div
+    class="p-4 rounded-xl shadow-lg {% if category == 'error' %}bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500{% else %}bg-gradient-to-r from-green-50 to-emerald-100 border-l-4 border-green-500{% endif %} animate-fade-in">
+    <div class="flex items-center">
+        {% if category == 'error' %}
+        <svg class="w-5 h-5 mr-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"></path>
+        </svg>
+        <span class="text-red-800 font-medium">{{ message }}</span>
+        {% else %}
+        <svg class="w-5 h-5 mr-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path>
+        </svg>
+        <span class="text-green-800 font-medium">{{ message }}</span>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{# Post Meta (Author + Timestamp) #}
+{% macro post_meta(author_name, timestamp, size='sm') %}
+<div
+    class="flex flex-wrap items-center gap-3 {% if size == 'lg' %}gap-4{% endif %} text-{% if size == 'lg' %}sm{% else %}xs sm:text-sm{% endif %} text-dark-500">
+    <div class="flex items-center">
+        {{ icon_user(size='3.5', css_class='sm:w-4 sm:h-4 mr-1 sm:mr-1.5') }}
+        <span class="font-medium text-dark-700">{{ author_name }}</span>
+    </div>
+    <div class="flex items-center">
+        {{ icon_clock(size='3.5', css_class='sm:w-4 sm:h-4 mr-1 sm:mr-1.5') }}
+        {% if size == 'lg' %}
+        <time datetime="{{ timestamp.isoformat() }}">{{ timestamp.strftime('%B %d, %Y at %H:%M') }}</time>
+        {% else %}
+        <time datetime="{{ timestamp.isoformat() }}" class="hidden sm:inline">{{ timestamp.strftime('%B %d, %Y at
+            %H:%M') }}</time>
+        <time datetime="{{ timestamp.isoformat() }}" class="sm:hidden">{{ timestamp.strftime('%b %d, %Y') }}</time>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{# Tag Badge #}
+{% macro tag_badge(tag_name) %}
+<span class="tag-badge">
+    {{ icon_tag(size='3', css_class='mr-1') }}
+    {{ tag_name }}
+</span>
+{% endmacro %}
+
+{# Tags List #}
+{% macro tags_list(tags) %}
+{% if tags %}
+<div class="flex flex-wrap gap-2">
+    {% for tag in tags %}
+    {{ tag_badge(tag.name) }}
+    {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{# Draft Badge #}
+{% macro draft_badge() %}
+<span class="bg-dark-400 text-white px-2 py-0.5 rounded text-xs font-semibold uppercase">Draft</span>
+{% endmacro %}
+
+{# Admin Badge #}
+{% macro admin_badge() %}
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-accent-100 text-accent-700">
+    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd"
+            d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+            clip-rule="evenodd"></path>
+    </svg>
+    Admin
+</span>
+{% endmacro %}
+
+{# Count Badge #}
+{% macro count_badge(count, label, color='primary') %}
+<span
+    class="{% if color == 'primary' %}bg-primary-100 text-primary-700{% else %}bg-white text-dark-700{% endif %} px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm {% if color == 'primary' %}font-semibold{% else %}shadow-sm{% endif %}">
+    {{ count }} {{ label }}{% if count != 1 %}s{% endif %}
+</span>
+{% endmacro %}
+
+{# Avatar Circle #}
+{% macro avatar(name, size='md', color='primary') %}
+{% set sizes = {'sm': 'w-8 h-8', 'md': 'w-10 h-10', 'lg': 'w-12 h-12'} %}
+{% set colors = {
+'primary': 'from-primary-500 to-accent-500',
+'accent': 'from-accent-400 to-accent-600'
+} %}
+<div
+    class="{{ sizes[size] }} bg-gradient-to-br {{ colors[color] }} rounded-full flex items-center justify-center text-white font-bold {% if size == 'sm' %}text-sm{% endif %}">
+    {{ name[0].upper() if name else '?' }}
+</div>
+{% endmacro %}
+
+{# Post Card (for index/listing pages) #}
+{% macro post_card(post, show_comments=false, loop_index=0) %}
+<article
+    class="card p-4 sm:p-6 md:p-8 border-l-4 border-primary-500 group animate-slide-up relative cursor-pointer hover:shadow-xl transition-shadow duration-200"
+    style="animation-delay: {{ loop_index * 50 }}ms;"
+    onclick="window.location.href='{{ url_for('main.post', post_id=post.id) }}'">
+    <!-- Post Header -->
+    <div class="flex items-start justify-between mb-3 sm:mb-4">
+        <h3 class="text-xl sm:text-2xl font-bold flex-1 pr-2">
+            <span class="text-dark-900 group-hover:text-primary-600 transition-colors duration-200">
+                {{ post.title }}
+                {% if post.is_draft %}
+                {{ draft_badge() }}
+                {% endif %}
+            </span>
+        </h3>
+        {{ icon_arrow_right(size='5', css_class='sm:w-6 sm:h-6 text-dark-300 group-hover:text-primary-500 transition-all
+        duration-200 flex-shrink-0') }}
+    </div>
+
+    <!-- Post Meta -->
+    {{ post_meta(post.author.username, post.timestamp) }}
+
+    <!-- Post Tags -->
+    {% if post.tags %}
+    <div class="mt-3 sm:mt-4">
+        {{ tags_list(post.tags) }}
+    </div>
+    {% endif %}
+</article>
+{% endmacro %}
+
+{# Comment Card #}
+{% macro comment_card(comment) %}
+<div
+    class="bg-gradient-to-r from-dark-50 to-transparent p-3 sm:p-4 md:p-6 rounded-xl border-l-4 border-accent-400 hover:shadow-md transition-shadow duration-200">
+    <!-- Comment Header -->
+    <div class="flex items-start justify-between mb-2 sm:mb-3">
+        <div class="flex items-center">
+            {{ avatar(comment.author_name, size='sm', color='accent') }}
+            <div class="ml-2 sm:ml-3">
+                <p class="font-bold text-dark-800 text-sm sm:text-base">{{ comment.author_name }}</p>
+                <time datetime="{{ comment.timestamp.isoformat() }}" class="text-xs text-dark-500 hidden sm:inline">
+                    {{ comment.timestamp.strftime('%B %d, %Y at %H:%M') }}
+                </time>
+                <time datetime="{{ comment.timestamp.isoformat() }}" class="text-xs text-dark-500 sm:hidden">
+                    {{ comment.timestamp.strftime('%b %d, %Y') }}
+                </time>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comment Body -->
+    <div class="prose prose-sm sm:prose max-w-none ml-0 sm:ml-13">
+        {{ comment.rendered_body | safe }}
+    </div>
+</div>
+{% endmacro %}
+
+{# Admin Action Buttons Group #}
+{% macro admin_actions(edit_url, delete_url, view_url='', confirm_message='Are you sure?') %}
+<div class="flex gap-2 self-start sm:self-auto">
+    {% if view_url %}
+    <a href="{{ view_url }}" class="btn-secondary text-sm" target="_blank">
+        {{ icon_eye(size='4', css_class='sm:mr-1') }}
+        <span class="hidden sm:inline">View</span>
+    </a>
+    {% endif %}
+
+    <a href="{{ edit_url }}" class="btn-secondary text-sm">
+        {{ icon_edit(size='4', css_class='sm:mr-1') }}
+        <span class="hidden sm:inline">Edit</span>
+    </a>
+
+    <form action="{{ delete_url }}" method="post" class="inline" onsubmit="return confirm('{{ confirm_message }}');">
+        <button type="submit" class="btn-danger text-sm">
+            {{ icon_delete(size='4', css_class='sm:mr-1') }}
+            <span class="hidden sm:inline">Delete</span>
+        </button>
+    </form>
+</div>
+{% endmacro %}
+
+{# Empty State #}
+{% macro empty_state(icon_path, title, message='') %}
+<div class="card p-12 text-center">
+    <svg class="w-16 h-16 mx-auto text-dark-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+            stroke-width="{% if icon_path == 'document' %}2{% else %}1.5{% endif %}" d="{{ icon_path }}"></path>
+    </svg>
+    {% if title %}
+    <h3 class="text-2xl font-semibold text-dark-700 mb-2">{{ title }}</h3>
+    {% endif %}
+    {% if message %}
+    <p class="text-dark-{% if title %}500{% else %}600{% endif %} {% if title %}text-base{% else %}text-lg{% endif %}">
+        {{ message }}</p>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{# Pagination Controls #}
+{% macro pagination_controls(pagination_obj, endpoint='index') %}
+{% if pagination_obj and pagination_obj.pages > 1 %}
+<div class="mt-8 sm:mt-12 flex justify-center items-center gap-2 flex-wrap">
+    {% if pagination_obj.has_prev %}
+    <a href="{{ url_for(endpoint, page=pagination_obj.prev_num) }}"
+        class="px-3 sm:px-4 py-2 bg-white hover:bg-primary-50 text-primary-600 rounded-lg shadow-sm hover:shadow transition-all duration-200 font-medium text-sm">
+        ← Previous
+    </a>
+    {% else %}
+    <span class="px-3 sm:px-4 py-2 bg-dark-100 text-dark-400 rounded-lg cursor-not-allowed text-sm">← Previous</span>
+    {% endif %}
+
+    <div class="flex gap-1 sm:gap-2">
+        {% for page_num in pagination_obj.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+        {% if page_num == pagination_obj.page %}
+        <span class="px-3 sm:px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold text-sm shadow-md">{{ page_num
+            }}</span>
+        {% else %}
+        <a href="{{ url_for(endpoint, page=page_num) }}"
+            class="px-3 sm:px-4 py-2 bg-white hover:bg-primary-50 text-dark-700 hover:text-primary-600 rounded-lg shadow-sm hover:shadow transition-all duration-200 text-sm">
+            {{ page_num }}
+        </a>
+        {% endif %}
+        {% else %}
+        <span class="px-2 py-2 text-dark-400 text-sm">…</span>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if pagination_obj.has_next %}
+    <a href="{{ url_for(endpoint, page=pagination_obj.next_num) }}"
+        class="px-3 sm:px-4 py-2 bg-white hover:bg-primary-50 text-primary-600 rounded-lg shadow-sm hover:shadow transition-all duration-200 font-medium text-sm">
+        Next →
+    </a>
+    {% else %}
+    <span class="px-3 sm:px-4 py-2 bg-dark-100 text-dark-400 rounded-lg cursor-not-allowed text-sm">Next →</span>
+    {% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{# Section Header (with icon and count) #}
+{% macro section_header(title, icon_svg_path, count=none, count_label='', action_url='', action_label='') %}
+<div class="flex items-center justify-between mb-6 {% if action_url %}sm:mb-8{% endif %} flex-wrap gap-3">
+    {% if title or count is not none %}
+    <div>
+        {% if title %}
+        <h1
+            class="text-{% if action_url %}3xl{% else %}2xl sm:text-3xl{% endif %} font-bold {% if count is none %}mb-2{% endif %} {% if action_url %}gradient-text{% else %}text-dark-800{% endif %} {% if icon_svg_path %}flex items-center{% endif %}">
+            {% if icon_svg_path %}
+            <svg class="w-6 h-6 sm:w-8 sm:h-8 mr-2 sm:mr-3 {% if action_url %}text-primary-600{% endif %}" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ icon_svg_path }}"></path>
+            </svg>
+            {% endif %}
+            {{ title }}
+        </h1>
+        {% endif %}
+        {% if count is not none %}
+        <p
+            class="text-dark-600 {% if not action_url %}text-xs sm:text-sm bg-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-sm inline-block{% endif %}">
+            {{ count }} {{ count_label }}{% if count != 1 %}s{% endif %}{% if action_url %} {{ count_label }}{% if count
+            != 1 %}s{% endif %} published{% endif %}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if action_url %}
+    <a href="{{ action_url }}" class="btn-primary">
+        {{ icon_plus(size='5', css_class='mr-2') }}
+        {{ action_label }}
+    </a>
+    {% endif %}
+</div>
+{% endmacro %}

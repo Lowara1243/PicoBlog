@@ -1,0 +1,57 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+venv/
+env/
+
+# Environment variables
+.env
+
+# Database
+data/
+
+# Uploaded files
+app/static/uploads/
+
+# Compiled CSS
+app/static/css/output.css
+
+# Node modules
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Instance folder
+instance/
+
+# AI & Project Specific
+.claude/
+debug_screenshots/
+debug_md.py
+*.bak
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~

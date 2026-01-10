@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Images{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+            <h1 class="text-3xl font-bold mb-2 gradient-text">Manage Images</h1>
+            <p class="text-dark-600">{{ images|length }} image{% if images|length != 1 %}s{% endif %} uploaded</p>
+        </div>
+        {% if images %}
+        <form action="{{ url_for('admin.admin_cleanup_images') }}" method="post" class="w-full sm:w-auto"
+            onsubmit="return confirm('This will delete all images not used in posts or comments. Continue?');">
+            <button type="submit" class="btn-secondary w-full sm:w-auto">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+                Clean Up Unused
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Images Grid -->
+    {% if images %}
+    <div class="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {% for image in images %}
+        <div class="card p-3 group">
+            <!-- Image Preview -->
+            <div class="aspect-square bg-dark-100 rounded-lg overflow-hidden mb-3">
+                <img src="{{ image.url }}" alt="{{ image.filename }}" class="w-full h-full object-cover">
+            </div>
+
+            <!-- Filename -->
+            <p class="text-xs text-dark-600 truncate mb-2" title="{{ image.filename }}">{{ image.filename }}</p>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button onclick="copyImageUrl('{{ image.url }}', '{{ image.filename }}')"
+                    class="flex-1 text-xs btn-secondary py-1 justify-center" title="Copy markdown code">
+                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Copy
+                </button>
+                <a href="{{ image.url }}" target="_blank" class="text-xs btn-secondary py-1 px-2"
+                    title="Open in new tab">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card p-12 text-center">
+        <svg class="w-16 h-16 mx-auto text-dark-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+            </path>
+        </svg>
+        <p class="text-dark-600 mb-4">No images uploaded yet</p>
+        <a href="{{ url_for('admin.admin_create_post') }}" class="btn-primary inline-flex">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Create a post to upload images
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Toast notification -->
+<div id="toast"
+    class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hidden animate-fade-in">
+    <div class="flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"></path>
+        </svg>
+        <span id="toastMessage">Copied!</span>
+    </div>
+</div>
+
+<script>
+    function copyImageUrl(url, filename) {
+        const markdown = `![${filename}](${url})`;
+
+        // Create temporary textarea
+        const textarea = document.createElement('textarea');
+        textarea.value = markdown;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            document.execCommand('copy');
+            showToast('Markdown code copied!');
+        } catch (err) {
+            showToast('Failed to copy');
+        }
+
+        document.body.removeChild(textarea);
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        toastMessage.textContent = message;
+        toast.classList.remove('hidden');
+
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 2000);
+    }
+</script>
+{% endblock %}

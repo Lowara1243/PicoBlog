@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
+        <!-- Login Card -->
+        <div
+            class="card p-10 shadow-xl hover:!transform-none hover:!shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div
+                    class="mx-auto w-16 h-16 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-dark-900 mb-2">Welcome Back</h1>
+                <p class="text-dark-500">Sign in to continue to PicoBlog</p>
+            </div>
+
+            <!-- Login Form -->
+            <form action="" method="post" novalidate class="space-y-6">
+                {{ form.hidden_tag() }}
+
+                <!-- Username Field -->
+                <div>
+                    {{ form.username.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        {{ form.username(size=32, class="input-field", style="padding-left: 3rem;", placeholder="Enter your username", required=True) }}
+                    </div>
+                    {% for error in form.username.errors %}
+                    <p class="mt-2 text-red-600 text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        {{ error }}
+                    </p>
+                    {% endfor %}
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    {{ form.password.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                </path>
+                            </svg>
+                        </div>
+                        {{ form.password(size=32, class="input-field", style="padding-left: 3rem;", placeholder="Enter your password", required=True) }}
+                    </div>
+                    {% for error in form.password.errors %}
+                    <p class="mt-2 text-red-600 text-sm flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                        {{ error }}
+                    </p>
+                    {% endfor %}
+                </div>
+
+                <!-- Remember Me Checkbox -->
+                <div class="flex items-center">
+                    {{ form.remember_me(class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-dark-300 rounded
+                    cursor-pointer") }}
+                    {{ form.remember_me.label(class="ml-2 block text-sm text-dark-700 cursor-pointer select-none") }}
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    {{ form.submit(class="btn-primary w-full text-center justify-center flex items-center
+                    hover:!transform-none") }}
+                </div>
+            </form>
+
+            <!-- Divider -->
+            <div class="mt-8 pt-6 border-t border-dark-200">
+                <p class="text-center text-sm text-dark-500">
+                    <svg class="w-4 h-4 inline-block mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    Secure login powered by PicoBlog
+                </p>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+{% endblock %}
