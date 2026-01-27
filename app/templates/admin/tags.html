@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Tags{% endblock %}
+
+{% block content %}
+<div class="animate-fade-in">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+            <h1 class="text-3xl font-bold mb-2 gradient-text">Manage Tags</h1>
+            <p class="text-dark-600">{{ tags|length }} tag{% if tags|length != 1 %}s{% endif %} available</p>
+        </div>
+        <a href="{{ url_for('admin.admin_create_tag') }}" class="btn-primary">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Add Tag
+        </a>
+    </div>
+
+    <!-- Tags List -->
+    {% if tags %}
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {% for tag in tags %}
+        <div class="card p-4 border-l-4 border-primary-500 group">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-dark-900 mb-1">{{ tag.name }}</h3>
+                    <p class="text-sm text-dark-700 font-medium">{{ tag.posts.count() }} post{% if tag.posts.count() !=
+                        1 %}s{% endif %}</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ url_for('admin.admin_edit_tag', tag_id=tag.id) }}"
+                        class="text-primary-600 hover:text-primary-700 p-2" title="Edit">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                            </path>
+                        </svg>
+                    </a>
+                    <form action="{{ url_for('admin.admin_delete_tag', tag_id=tag.id) }}" method="post" class="inline"
+                        onsubmit="return confirm('Are you sure you want to delete this tag?');">
+                        <button type="submit" class="text-red-600 hover:text-red-700 p-2" title="Delete">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                </path>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card p-12 text-center">
+        <svg class="w-16 h-16 mx-auto text-dark-300 mb-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                clip-rule="evenodd"></path>
+        </svg>
+        <p class="text-dark-600">No tags found</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

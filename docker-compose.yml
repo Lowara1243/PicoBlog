@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    container_name: PicoBlog
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - DATABASE_URL=sqlite:////app/data/app.db
+    volumes:
+      - ./data:/app/data
+      - ./app/static/uploads:/app/static/uploads

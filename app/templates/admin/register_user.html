@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Register New User{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto animate-fade-in">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold mb-2 gradient-text">Register New User</h1>
+        <p class="text-dark-600">Create a new user account</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card p-6 sm:p-8">
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+
+            <!-- Username Field -->
+            <div class="mb-6">
+                {{ form.username.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                {{ form.username(size=32, class="input-field", required=True) }}
+                {% for error in form.username.errors %}
+                <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Email Field -->
+            <div class="mb-6">
+                {{ form.email.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                {{ form.email(size=32, class="input-field") }}
+                {% for error in form.email.errors %}
+                <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Password Field -->
+            <div class="mb-6">
+                {{ form.password.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                {{ form.password(size=32, class="input-field", required=True) }}
+                {% for error in form.password.errors %}
+                <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Password2 Field -->
+            <div class="mb-6">
+                {{ form.password2.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                {{ form.password2(size=32, class="input-field", required=True) }}
+                {% for error in form.password2.errors %}
+                <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Allowed Tags -->
+            <div class="mb-6">
+                {{ form.allowed_tags.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                <div class="tag-selector-wrapper">
+                    {{ form.allowed_tags(class="hidden", id="allowed-tags-select") }}
+                    <div class="tag-selector" id="tag-selector-allowed-tags"></div>
+                </div>
+                {% for error in form.allowed_tags.errors %}
+                <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                {% endfor %}
+                <p class="mt-2 text-xs text-dark-500">If empty, user will only see posts without tags.</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                {{ form.submit(class="btn-primary flex-1 justify-center") }}
+                <a href="{{ url_for('admin.admin_users') }}" class="btn-outline flex-1 text-center">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Tag Selector Styles */
+    .tag-selector {
+        position: relative;
+        min-height: 42px;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background: white;
+        cursor: text;
+        transition: all 0.2s;
+    }
+
+    .tag-selector:focus-within {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    .tag-selector-selected {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .tag-selector-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        background: #86efac;
+        color: #14532d;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .tag-selector-badge button {
+        margin-left: 0.25rem;
+        color: #14532d;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .tag-selector-badge button:hover {
+        opacity: 1;
+    }
+
+    .tag-selector-input-wrapper {
+        position: relative;
+    }
+
+    .tag-selector-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: none;
+        outline: none;
+        font-size: 0.875rem;
+    }
+
+    .tag-selector-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 200px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        margin-top: 0.25rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        display: none;
+    }
+
+    .tag-selector-dropdown.active {
+        display: block;
+    }
+
+    .tag-selector-option {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        font-size: 0.875rem;
+    }
+
+    .tag-selector-option:hover {
+        background: #f1f5f9;
+    }
+
+    .tag-selector-option.selected {
+        background: #dcfce7;
+        color: #15803d;
+        font-weight: 500;
+    }
+
+    .tag-selector-empty {
+        padding: 1rem;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.875rem;
+    }
+</style>
+
+<script>
+    // Tag Selector Component
+    class TagSelector {
+        constructor(selectElement, containerId) {
+            this.select = selectElement;
+            this.container = document.getElementById(containerId);
+            this.selectedTags = new Set();
+            this.allOptions = [];
+
+            this.init();
+        }
+
+        init() {
+            // Get all options from select
+            Array.from(this.select.options).forEach(option => {
+                this.allOptions.push({
+                    value: option.value,
+                    label: option.text
+                });
+                if (option.selected) {
+                    this.selectedTags.add(option.value);
+                }
+            });
+
+            // Build UI
+            this.render();
+            this.attachEvents();
+        }
+
+        render() {
+            this.container.innerHTML = `
+                    <div class="tag-selector-selected" id="${this.container.id}-selected"></div>
+                    <div class="tag-selector-input-wrapper">
+                        <input type="text" class="tag-selector-input" placeholder="Search tags..." id="${this.container.id}-input">
+                        <div class="tag-selector-dropdown" id="${this.container.id}-dropdown"></div>
+                    </div>
+                `;
+
+            this.selectedContainer = document.getElementById(`${this.container.id}-selected`);
+            this.input = document.getElementById(`${this.container.id}-input`);
+            this.dropdown = document.getElementById(`${this.container.id}-dropdown`);
+
+            this.renderSelected();
+            this.renderDropdown();
+        }
+
+        renderSelected() {
+            this.selectedContainer.innerHTML = '';
+            this.selectedTags.forEach(value => {
+                const option = this.allOptions.find(o => o.value === value);
+                if (option) {
+                    const badge = document.createElement('div');
+                    badge.className = 'tag-selector-badge';
+                    badge.innerHTML = `
+                            ${option.label}
+                            <button type="button" data-value="${value}">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        `;
+                    this.selectedContainer.appendChild(badge);
+                }
+            });
+        }
+
+        renderDropdown() {
+            const query = this.input.value.toLowerCase();
+            const filtered = this.allOptions.filter(opt =>
+                opt.label.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                this.dropdown.innerHTML = '<div class="tag-selector-empty">No tags found</div>';
+            } else {
+                this.dropdown.innerHTML = filtered.map(opt => {
+                    const isSelected = this.selectedTags.has(opt.value);
+                    return `<div class="tag-selector-option ${isSelected ? 'selected' : ''}" data-value="${opt.value}">${opt.label}</div>`;
+                }).join('');
+            }
+        }
+
+        attachEvents() {
+            // Show dropdown on focus
+            this.input.addEventListener('focus', () => {
+                this.dropdown.classList.add('active');
+            });
+
+            // Search functionality
+            this.input.addEventListener('input', () => {
+                this.renderDropdown();
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                if (!this.container.contains(e.target)) {
+                    this.dropdown.classList.remove('active');
+                }
+            });
+
+            // Select/deselect tags
+            this.dropdown.addEventListener('click', (e) => {
+                const option = e.target.closest('.tag-selector-option');
+                if (option) {
+                    const value = option.dataset.value;
+                    this.toggleTag(value);
+                }
+            });
+
+            // Remove tag badges
+            this.selectedContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button) {
+                    const value = button.dataset.value;
+                    this.toggleTag(value);
+                }
+            });
+        }
+
+        toggleTag(value) {
+            if (this.selectedTags.has(value)) {
+                this.selectedTags.delete(value);
+            } else {
+                this.selectedTags.add(value);
+            }
+
+            // Update original select
+            Array.from(this.select.options).forEach(option => {
+                option.selected = this.selectedTags.has(option.value);
+            });
+
+            // Update UI
+            this.renderSelected();
+            this.renderDropdown();
+            this.input.value = '';
+            this.input.focus();
+        }
+    }
+
+    // Initialize tag selector for allowed tags
+    document.addEventListener('DOMContentLoaded', () => {
+        const allowedTagsSelect = document.getElementById('allowed-tags-select');
+        if (allowedTagsSelect) {
+            new TagSelector(allowedTagsSelect, 'tag-selector-allowed-tags');
+        }
+    });
+</script>
+{% endblock %}

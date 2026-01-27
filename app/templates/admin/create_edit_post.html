@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Post' if post is defined else 'Create New Post' }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto animate-fade-in">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold mb-2 gradient-text">{{ 'Edit Post' if post is defined else 'Create New Post' }}
+        </h1>
+        <p class="text-dark-600">{{ 'Update your post content' if post is defined else 'Write a new blog post' }}</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Form -->
+        <div class="lg:col-span-2">
+            <div class="card p-6 sm:p-8">
+                <form action="" method="post" novalidate>
+                    {{ form.hidden_tag() }}
+
+                    <!-- Title Field -->
+                    <div class="mb-6">
+                        {{ form.title.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                        {{ form.title(size=32, class="input-field", required=True) }}
+                        {% for error in form.title.errors %}
+                        <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Body Field -->
+                    <div class="mb-6">
+                        {{ form.body.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                        {{ form.body(rows=12, class="input-field font-mono text-sm min-h-[200px] sm:min-h-[300px]",
+                        required=True) }}
+                        {% for error in form.body.errors %}
+                        <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                        <p class="mt-2 text-xs text-dark-500">Supports Markdown formatting</p>
+                    </div>
+
+                    <!-- Tags Field -->
+                    <div class="mb-6">
+                        {{ form.tags.label(class="block text-sm font-semibold text-dark-700 mb-2") }}
+                        <div class="tag-selector-wrapper">
+                            {{ form.tags(class="hidden", id="tags-select") }}
+                            <div class="tag-selector" id="tag-selector-tags"></div>
+                        </div>
+                        {% for error in form.tags.errors %}
+                        <p class="mt-2 text-red-600 text-sm">{{ error }}</p>
+                        {% endfor %}
+                        <p class="mt-2 text-xs text-dark-500">Leave empty for public posts (visible to all)</p>
+                    </div>
+
+                    <!-- Comments Settings -->
+                    <div class="mb-6">
+                        <label class="flex items-center cursor-pointer">
+                            {{ form.comments_enabled(class="w-4 h-4 text-primary-600 border-dark-300 rounded
+                            focus:ring-primary-500 mr-2") }}
+                            <span class="text-sm font-semibold text-dark-700">{{ form.comments_enabled.label.text
+                                }}</span>
+                        </label>
+                        <p class="mt-2 text-xs text-dark-500 ml-6">Uncheck to disable comments on this post</p>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        {{ form.publish(class="btn-primary flex-1 justify-center") }}
+                        {{ form.save_draft(class="btn-secondary flex-1 justify-center") }}
+                        <a href="{{ url_for('admin.admin_posts') }}" class="btn-outline flex-1 text-center">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Image Upload Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="card p-6 sticky top-20">
+                <h3 class="text-lg font-bold text-dark-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Upload Image
+                </h3>
+
+                <!-- Upload Form -->
+                <div class="mb-4">
+                    <input type="file" id="imageUpload" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                        class="hidden">
+                    <button type="button" onclick="document.getElementById('imageUpload').click()"
+                        class="btn-secondary w-full py-2">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                            </path>
+                        </svg>
+                        Choose Image
+                    </button>
+                </div>
+
+                <!-- Upload Status -->
+                <div id="uploadStatus" class="hidden mb-4"></div>
+
+                <!-- Preview -->
+                <div id="imagePreview" class="hidden mb-4">
+                    <img id="previewImage" src="" alt="Preview" class="w-full rounded-lg border border-dark-200">
+                </div>
+
+                <!-- Markdown Code -->
+                <div id="markdownCode" class="hidden">
+                    <label class="block text-sm font-semibold text-dark-700 mb-2">Markdown Code:</label>
+                    <div class="relative">
+                        <textarea id="markdownText" rows="3" readonly class="input-field font-mono text-xs"></textarea>
+                        <button type="button" onclick="copyMarkdown()"
+                            class="absolute top-2 right-2 text-primary-600 hover:text-primary-700 p-1"
+                            title="Copy to clipboard">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="mt-2 text-xs text-dark-500">Copy this code into your post body</p>
+                </div>
+
+                <!-- Quick Guide -->
+                <div class="mt-6 pt-6 border-t border-dark-200">
+                    <h4 class="text-sm font-semibold text-dark-700 mb-3">Markdown Quick Guide:</h4>
+                    <div class="space-y-2 text-xs text-dark-600">
+                        <div><code class="bg-dark-100 px-1 py-0.5 rounded">**bold**</code> → <strong>bold</strong></div>
+                        <div><code class="bg-dark-100 px-1 py-0.5 rounded">*italic*</code> → <em>italic</em></div>
+                        <div><code class="bg-dark-100 px-1 py-0.5 rounded"># Heading</code> → heading</div>
+                        <div><code class="bg-dark-100 px-1 py-0.5 rounded">[link](url)</code> → hyperlink</div>
+                        <div><code class="bg-dark-100 px-1 py-0.5 rounded">![alt](url)</code> → image</div>
+                    </div>
+
+                    <h4 class="text-sm font-semibold text-dark-700 mt-4 mb-3">Image Sizing:</h4>
+                    <div class="space-y-2 text-xs text-dark-600">
+                        <div class="mb-1"><strong>Using HTML (recommended):</strong></div>
+                        <div><code
+                                class="bg-dark-100 px-1 py-0.5 rounded text-[10px]">&lt;img src="url" width="600"&gt;</code>
+                        </div>
+                        <div class="mb-1 mt-2"><strong>Using CSS classes:</strong></div>
+                        <div><code
+                                class="bg-dark-100 px-1 py-0.5 rounded text-[10px]">&lt;img src="url" class="img-small"&gt;</code>
+                        </div>
+                        <div class="text-[10px] ml-2">• <span class="font-mono">img-small</span> - 300px max</div>
+                        <div class="text-[10px] ml-2">• <span class="font-mono">img-medium</span> - 600px max</div>
+                        <div class="text-[10px] ml-2">• <span class="font-mono">img-large</span> - 100% max</div>
+                        <div class="text-[10px] ml-2">• <span class="font-mono">img-full</span> - 100% width</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</style>
+
+<script>
+    // Tag Selector Component
+    class TagSelector {
+        constructor(selectElement, containerId) {
+            this.select = selectElement;
+            this.container = document.getElementById(containerId);
+            this.selectedTags = new Set();
+            this.allOptions = [];
+
+            this.init();
+        }
+
+        init() {
+            // Get all options from select
+            Array.from(this.select.options).forEach(option => {
+                let label = option.text;
+                let is_master = false;
+                if (label.endsWith(' [M]')) {
+                    label = label.slice(0, -4); // Remove ' [M]'
+                    is_master = true;
+                }
+                this.allOptions.push({
+                    value: option.value,
+                    label: label,
+                    is_master: is_master
+                });
+                if (option.selected) {
+                    this.selectedTags.add(option.value);
+                }
+            });
+
+            // Build UI
+            this.render();
+            this.attachEvents();
+        }
+
+        render() {
+            this.container.innerHTML = `
+                    <div class="tag-selector-selected" id="${this.container.id}-selected"></div>
+                    <div class="tag-selector-input-wrapper">
+                        <input type="text" class="tag-selector-input" placeholder="Search tags..." id="${this.container.id}-input">
+                        <div class="tag-selector-dropdown" id="${this.container.id}-dropdown"></div>
+                    </div>
+                `;
+
+            this.selectedContainer = document.getElementById(`${this.container.id}-selected`);
+            this.input = document.getElementById(`${this.container.id}-input`);
+            this.dropdown = document.getElementById(`${this.container.id}-dropdown`);
+
+            this.renderSelected();
+            this.renderDropdown();
+        }
+
+        renderSelected() {
+            this.selectedContainer.innerHTML = '';
+            this.selectedTags.forEach(value => {
+                const option = this.allOptions.find(o => o.value === value);
+                if (option) {
+                    const badge = document.createElement('div');
+                    badge.className = 'tag-selector-badge';
+                    let labelHtml = option.label;
+                    if (option.is_master) {
+                        labelHtml += '<span class="ml-1 text-green-600 font-semibold">[M]</span>';
+                    }
+                    badge.innerHTML = `
+                            ${labelHtml}
+                            <button type="button" data-value="${value}">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                            </button>
+                        `;
+                    this.selectedContainer.appendChild(badge);
+                }
+            });
+        }
+
+        renderDropdown() {
+            const query = this.input.value.toLowerCase();
+            const filtered = this.allOptions.filter(opt =>
+                opt.label.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                this.dropdown.innerHTML = '<div class="tag-selector-empty">No tags found</div>';
+            } else {
+                this.dropdown.innerHTML = filtered.map(opt => {
+                    const isSelected = this.selectedTags.has(opt.value);
+                    let labelHtml = opt.label;
+                    if (opt.is_master) {
+                        labelHtml += '<span class="ml-1 text-green-600 font-semibold">[M]</span>';
+                    }
+                    return `<div class="tag-selector-option ${isSelected ? 'selected' : ''}" data-value="${opt.value}">${labelHtml}</div>`;
+                }).join('');
+            }
+        }
+
+        attachEvents() {
+            // Show dropdown on focus
+            this.input.addEventListener('focus', () => {
+                this.dropdown.classList.add('active');
+            });
+
+            // Search functionality
+            this.input.addEventListener('input', () => {
+                this.renderDropdown();
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                if (!this.container.contains(e.target)) {
+                    this.dropdown.classList.remove('active');
+                }
+            });
+
+            // Select/deselect tags
+            this.dropdown.addEventListener('click', (e) => {
+                const option = e.target.closest('.tag-selector-option');
+                if (option) {
+                    const value = option.dataset.value;
+                    this.toggleTag(value);
+                }
+            });
+
+            // Remove tag badges
+            this.selectedContainer.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button) {
+                    const value = button.dataset.value;
+                    this.toggleTag(value);
+                }
+            });
+        }
+
+        toggleTag(value) {
+            if (this.selectedTags.has(value)) {
+                this.selectedTags.delete(value);
+            } else {
+                this.selectedTags.add(value);
+            }
+
+            // Update original select
+            Array.from(this.select.options).forEach(option => {
+                option.selected = this.selectedTags.has(option.value);
+            });
+
+            // Update UI
+            this.renderSelected();
+            this.renderDropdown();
+            this.input.value = '';
+            this.input.focus();
+        }
+    }
+
+    // Initialize tag selector for posts
+    document.addEventListener('DOMContentLoaded', () => {
+        const tagsSelect = document.getElementById('tags-select');
+        if (tagsSelect) {
+            new TagSelector(tagsSelect, 'tag-selector-tags');
+        }
+    });
+
+    // Image upload handling
+    document.getElementById('imageUpload').addEventListener('change', async function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const uploadStatus = document.getElementById('uploadStatus');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImage = document.getElementById('previewImage');
+        const markdownCode = document.getElementById('markdownCode');
+        const markdownText = document.getElementById('markdownText');
+
+        // Show loading
+        uploadStatus.className = 'block p-3 bg-blue-50 border-l-4 border-blue-500 text-blue-700 text-sm rounded';
+        uploadStatus.textContent = 'Uploading...';
+        imagePreview.classList.add('hidden');
+        markdownCode.classList.add('hidden');
+
+        // Upload file
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('{{ url_for("admin.admin_upload_image") }}', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Show success
+                uploadStatus.className = 'block p-3 bg-green-50 border-l-4 border-green-500 text-green-700 text-sm rounded';
+                uploadStatus.innerHTML = '<div class="flex items-center"><svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>Image uploaded successfully!</div>';
+
+                // Show preview
+                previewImage.src = data.url;
+                imagePreview.classList.remove('hidden');
+
+                // Show markdown code
+                const markdown = `![${file.name}](${data.url})`;
+                markdownText.value = markdown;
+                markdownCode.classList.remove('hidden');
+            } else {
+                // Show error
+                uploadStatus.className = 'block p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded';
+                uploadStatus.textContent = 'Error: ' + (data.error || 'Upload failed');
+            }
+        } catch (error) {
+            uploadStatus.className = 'block p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm rounded';
+            uploadStatus.textContent = 'Error: ' + error.message;
+        }
+    });
+
+    // Copy markdown to clipboard
+    function copyMarkdown() {
+        const markdownText = document.getElementById('markdownText');
+        markdownText.select();
+        document.execCommand('copy');
+
+        // Show feedback
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>';
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+        }, 1500);
+    }
+</script>
+{% endblock %}
