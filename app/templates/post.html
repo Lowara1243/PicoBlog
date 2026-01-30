@@ -16,10 +16,11 @@
 </div>
 
 <!-- Post Content -->
-<article class="card p-4 sm:p-6 md:p-8 lg:p-12 mb-6 sm:mb-8 animate-slide-up">
+<article class="card card-static p-4 sm:p-6 md:p-8 lg:p-12 mb-6 sm:mb-8 animate-slide-up">
     <!-- Post Header -->
     <header class="mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-dark-100">
-        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-dark-900 mb-3 sm:mb-4 leading-tight">{{ post.title }}</h1>
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-dark-900 mb-3 sm:mb-4 leading-tight">{{
+            post.title }}</h1>
 
         <!-- Post Meta -->
         <div class="flex flex-wrap items-center gap-4 text-dark-500">
@@ -62,7 +63,7 @@
 
 <!-- Comments Section -->
 {% if post.comments_enabled %}
-<section class="card p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 animate-slide-up" style="animation-delay: 100ms;">
+<section class="card card-static p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 animate-slide-up" style="animation-delay: 100ms;">
     <!-- Comments Header -->
     <div class="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b-2 border-dark-100 flex-wrap gap-3">
         <h2 class="text-2xl sm:text-3xl font-bold text-dark-800 flex items-center">
