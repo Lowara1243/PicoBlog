@@ -386,18 +386,22 @@
 
 .dark [class*="bg-green-100"] {
   background-color: #064e3b !important;
+  color: #dcfce7 !important;
 }
 
 .dark [class*="bg-purple-100"] {
   background-color: #4c1d95 !important;
+  color: #f3e8ff !important;
 }
 
 .dark [class*="bg-blue-100"] {
   background-color: #1e3a8a !important;
+  color: #dbeafe !important;
 }
 
 .dark [class*="bg-pink-100"] {
   background-color: #831843 !important;
+  color: #fce7f3 !important;
 }
 
 .dark [class*="bg-red-50"] {
@@ -547,9 +551,9 @@ h6 {
 }
 
 .dark .btn-outline:hover {
-  background: var(--color-dark-800) !important;
-  border-color: var(--color-dark-600) !important;
-  color: var(--color-dark-50) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--color-text-header) !important;
 }
 
 .btn-primary:disabled,
@@ -573,6 +577,10 @@ h6 {
 .card:hover {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+.card-static:hover {
+  transform: none !important;
 }
 
 .input-field {
